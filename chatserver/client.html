@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chatbot Test Client</title>
+
+
+    <script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+
+<!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  
+</head>
+
+
+<body>
+  <div class="container">
+  <div class="row">
+    <div class="col-md-6 col-lg-6 ">
+
+      <label for="usr">ChatBot</label>
+      <div id="chatbox">
+            <div> 
+            Server: Yo what's up
+            </div>
+
+            <div style="color:grey;text-align: right"> 
+            You: nothing much
+            </div>
+      </div>
+
+      <input type="text" class="form-control" id="chat_input" style="width:100%">
+      <button type="submit" class="btn btn-success" id="chat_send">Send</button>
+
+
+    </div>
+    </div>
+  </div>
+</body>
+
+<script>
+
+var chat_id = -1;
+  
+function initial_server_request() {
+
+  var query = {
+    first_msg : 'true'
+  };
+
+        $.ajax({
+        url: "http://localhost:8000/chat/",
+        type: 'post',
+        dataType: 'json',
+        success: function(data) {
+
+            console.log("success");
+            console.log("data is " + JSON.stringify(data));
+
+            chat_id = data['chat_id'];
+
+            var $server_div = $("<div>");
+            var $server_p = $("<p>");
+            $server_p.text('Server: ' + data['reply']);
+
+            $server_div.append($server_p);
+            $('#chatbox').append($server_div);
+
+
+
+        },
+        error: function(data) {
+            console.log("initial server request error");
+        },
+        data: JSON.stringify(query)
+    });
+}
+
+
+initial_server_request();
+
+
+$( "#chat_send").click(function() {
+
+            var client_msg = $('#chat_input').val();
+
+            var $client_div = $("<div>",{"style": "color:grey;text-align: right"});
+            var $client_p = $("<p>");
+            $client_p.text('You: ' + client_msg);
+
+            $client_div.append($client_p);
+            $('#chatbox').append($client_div);
+            $('#chat_input').val('');
+
+
+            var query = {
+              client_msg : client_msg,
+              chat_id : chat_id
+            };
+
+
+            $.ajax({
+                url: "http://localhost:8000/chat/",
+                type: 'post',
+                dataType: 'json',
+                success: function(data) {
+
+                    console.log("success");
+                    console.log("data is " + JSON.stringify(data));
+
+                    var $server_div = $("<div>");
+                    var $server_p = $("<p>");
+                    $server_p.text('Server: ' + data['reply']);
+
+                    $server_div.append($server_p);
+                    $('#chatbox').append($server_div);
+
+
+                },
+                error: function(data) {
+                    console.log("initial server request error");
+                },
+                data: query
+             });
+
+});
+
+</script>
+
+
+
+</html>
